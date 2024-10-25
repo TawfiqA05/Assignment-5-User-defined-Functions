@@ -1,0 +1,149 @@
+TawfiqA05: Write a function which determines which states had the highest death increase across the entire dataset.
+
+make sure that it is generalzed to the whole data set provided and that no external libraries are used 
+
+GitHub Copilot: To determine which states had the highest death increase across the entire dataset, we need to parse the CSV data, extract the relevant columns, and then compute the difference in deaths for each state. Here's a step-by-step plan:
+
+1. Read the CSV data.
+2. Parse the data into a list of dictionaries for easier manipulation.
+3. Extract the state and death columns.
+4. Compute the death increase for each state.
+5. Determine the state with the highest death increase.
+
+Here's the implementation in Python:
+
+```python
+def parse_csv_data(csv_data):
+    lines = csv_data.strip().split("\n")
+    headers = lines[0].split(",")
+    data = [dict(zip(headers, line.split(","))) for line in lines[1:]]
+    return data
+
+def get_state_death_increase(data):
+    state_deaths = {}
+    
+    for entry in data:
+        state = entry['state']
+        deaths = entry['deathIncrease']
+        
+        if deaths:
+            deaths = int(deaths)
+            if state in state_deaths:
+                state_deaths[state] += deaths
+            else:
+                state_deaths[state] = deaths
+    
+    return state_deaths
+
+def find_highest_death_increase(state_deaths):
+    max_deaths = -1
+    max_state = None
+    
+    for state, deaths in state_deaths.items():
+        if deaths > max_deaths:
+            max_deaths = deaths
+            max_state = state
+    
+    return max_state, max_deaths
+
+# Example usage
+csv_data = """date,state,positive,negative,totalTestResults,hospitalizedCurrently,hospitalizedCumulative,inIcuCurrently,inIcuCumulative,onVentilatorCurrently,onVentilatorCumulative,recovered,dateChecked,death,hospitalized,deathIncrease,hospitalizedIncrease,negativeIncrease,positiveIncrease,totalTestResultsIncrease
+20201116,MS,134898,22288,906991,,posNeg,1041889,807,7091,180,,96,,116683,A+,11/15/2020 00:00,2020-11-15T00:00:00Z,11/14 19:00,3545,7091,2020-11-15T00:00:00Z,1019601,,,112610,3138,407,,,48342,95,,,,,,,145992,,28,589,33128,1041889,33717,1041889,2,177,2341f0108612c80a37b46200fbb19dc6bd501691,0,0,0,0,0,
+20201116,MT,48027,,525307,,posNeg,573334,453,2066,,,,,27496,B,11/16/2020 01:59,2020-11-16T01:59:00Z,11/15 20:59,522,2066,2020-11-16T01:59:00Z,573334,,,48027,,,,,,,,,,,,,,,30,869,-96,573334,773,573334,2,19,576f58e54645f5b0fc0233e1b9f10ee022f6d67e,0,0,0,0,0,
+20201116,NC,314207,15146,4345622,,posNeg,4659829,1424,,360,,,,276132,A+,11/16/2020 11:40,2020-11-16T11:40:00Z,11/16 06:40,4814,,2020-11-16T11:40:00Z,4644683,,,299061,4704,110,,,,,,,,,,,67638,,37,1972,25248,4659829,27220,4659829,8,0,699dd8a93fac4e76a66343b036b51b749e6bd77f,0,0,0,0,0,
+20201116,ND,64885,,260606,,totalTestEncountersViral,970684,400,2195,39,369,,,53242,B,11/16/2020 01:59,2020-11-16T01:59:00Z,11/15 20:59,749,2195,2020-11-16T01:59:00Z,1016356,,,64885,743,6,970684,325491,11258,781,10477,,,,,,,,38,1089,742,325491,7759,325491,7,17,47126f304a1ee55cac13e6d61f7f69db73395b95,0,0,0,0,0,
+20201116,NE,98161,,566819,,totalTestsViral,1137246,914,3575,,,,,53528,A,11/15/2020 22:00,2020-11-15T22:00:00Z,11/15 17:00,779,3575,2020-11-15T22:00:00Z,1137246,113226,1022658,98161,,,,665310,,,,,,,,,,,31,1327,2410,664980,7014,664980,0,24,03075c91fe850cd0d771e8882776cfe9da187799,0,0,0,0,0,
+20201116,NH,15029,,372579,,totalTestsViral,717889,74,817,,268,,,11185,B,11/16/2020 09:00,2020-11-16T09:00:00Z,11/16 04:00,500,817,2020-11-16T09:00:00Z,717889,,,15029,,,,387608,33500,,,32656,,,,,,,33,358,2498,387608,27530,387608,1,13,7e928432cc9a10349a858a05fd879e0b59ddbd42,0,0,0,0,0,
+20201116,NJ,281493,,5059796,,posNeg,5341289,2115,39106,417,,137,,39643,A,11/16/2020 00:00,2020-11-16T00:00:00Z,11/15 19:00,16580,39106,2020-11-16T00:00:00Z,5339070,,,281493,14779,1801,,,,,,,,,,,,,34,2219,0,5341289,2219,5341289,14,88,61f80592740372c1f81afd291ec7598931f932d8,0,0,0,0,0,
+20201116,NM,65454,,1320667,,posNeg,1386121,738,5684,,,,,25411,A,11/16/2020 17:51,2020-11-16T17:51:00Z,11/16 12:51,1236,5684,2020-11-16T17:51:00Z,1386121,,,65454,,,,,,,,,,,,,,,35,1253,12001,1386121,13254,1386121,21,114,751954528c99fbd8ac98cd4448b7b446ac52b933,0,0,0,0,0,
+20201116,NV,122097,,765062,,totalTestEncountersViral,1435791,1157,,251,,146,,,A+,11/16/2020 00:00,2020-11-16T00:00:00Z,11/15 19:00,1917,,2020-11-16T00:00:00Z,1154583,,,122097,,,1435791,887159,,,,,,,,,,,32,1914,2722,887159,9709,887159,8,0,6019f93a8d3bda5d6bf24c426fb4dc5da6b1a8b8,0,0,0,0,0,
+20201116,NY,563690,,16313153,,totalTestEncountersViral,16876843,1968,89995,391,,158,,81908,B,11/15/2020 23:59,2020-11-15T23:59:00Z,11/15 18:59,26159,89995,2020-11-15T23:59:00Z,,,,563690,,,16876843,,,,,,,,,,,,36,3490,121075,16876843,124565,16876843,26,0,17e76f43a703b59161dd931a90dfca4437f278e0,0,0,0,0,0,
+20201116,OH,305364,15771,5013475,,posNeg,5318839,3387,22478,850,4223,407,,205198,A+,11/16/2020 14:00,2020-11-16T14:00:00Z,11/16 09:00,5742,22478,2020-11-16T14:00:00Z,5303068,,,289593,5387,355,,,,,,,,,,,,,39,7268,49545,5318839,56813,5318839,20,213,914de5306e36593d49a8c9770130e0b44687ad68,0,0,0,0,0,
+20201116,OK,156857,,1653599,7999,posNeg,1810456,1247,10417,362,,,,126162,A+,11/16/2020 00:00,2020-11-16T00:00:00Z,11/15 19:00,1538,10417,2020-11-16T00:00:00Z,1816690,159890,1653599,156857,,,,,93221,5545,,,,,,,,,40,2729,0,1818455,2729,1810456,10,45,952b9cd8673ab437682d3eac71343e746eebae58,0,0,0,0,0,
+20201116,OR,57646,2851,905336,,posNeg,962982,413,3754,93,,40,,5870,A+,11/16/2020 03:01,2020-11-16T03:01:00Z,11/15 22:01,765,3754,2020-11-16T03:01:00Z,,,905336,54795,,,,960131,,,,,,,,,,,41,766,4237,962982,5003,962982,4,126,72463d62daa1207acd581e5f5e040f6f992637f2,0,0,0,0,0,
+20201116,PA,269613,16480,2573621,,posNeg,2843234,2575,,558,,269,,183336,A+,11/16/2020 12:00,2020-11-16T12:00:00Z,11/16 07:00,9325,,2020-11-16T12:00:00Z,4812593,,,253133,,,,2826754,,,,,,,,,,,42,4476,14125,2843234,18601,2843234,13,0,db9d83a730090e4c01e49b17aa9cf5a5ed5ca4db,0,0,0,0,0,
+20201116,PR,43016,737,305972,,posNeg,348988,533,,83,,66,,35461,B,11/16/2020 00:00,2020-11-16T00:00:00Z,11/15 19:00,942,,2020-11-16T00:00:00Z,310546,7002,303412,42279,731,211,,,,36618,,,,,,,,,72,537,0,348988,537,348988,7,0,5e7e9504359b2d166c99040913eabcac06ec6d67,0,0,0,0,0,
+20201116,RI,43923,,441477,,totalTestEncountersViral,1355717,256,3857,21,,12,,3172,A+,11/16/2020 13:00,2020-11-16T13:00:00Z,11/16 08:00,1270,3857,2020-11-16T13:00:00Z,,55838,1299879,43923,,,1355717,485400,,,,,,,,,,,44,481,1336,485400,6195,485400,5,0,1dd8d4f0152a3013706b3b43ff87fc337a0e3d70,0,0,0,0,0,
+20201116,SC,196617,11227,1908916,,posNeg,2105533,769,11233,210,,102,,102038,A+,11/15/2020 11:59,2020-11-15T11:59:00Z,11/15 06:59,4143,11233,2020-11-15T11:59:00Z,2094306,244537,1849769,185390,3873,270,,,85117,10125,74992,,,,,,161448,20732,45,1110,13834,2105533,14944,2105533,31,22,6bf6475eaa15f70fa530b7b6fbfd98e42bba8a43,0,0,0,0,0,
+20201116,SD,66278,3757,229869,,totalTestsPeopleViral,296147,560,3698,97,,48,,47495,A+,11/15/2020 14:00,2020-11-15T14:00:00Z,11/15 09:00,644,3698,2020-11-15T14:00:00Z,522443,,,62521,,,,296147,,,,,,,,,,,46,897,1136,296147,2033,296147,0,54,8c09cfdbaf5352d3b95e76bc7f85df378dbb2019,0,0,0,0,0,
+20201116,TN,318888,22234,3842958,,posNeg,4161846,1999,11201,541,,237,,271864,A+,11/16/2020 15:00,2020-11-16T15:00:00Z,11/16 10:00,3923,11201,2020-11-16T15:00:00Z,4139612,352357,3787255,296654,3645,278,,,,,,,,,,,217176,21924,47,7951,53566,4161846,61517,4161846,30,60,3a8062d8d5c4b1f1fbdf90a2b935abb1e6376d4d,0,0,0,0,0,
+20201116,TX,1027889,,8350722,,posNeg,9378611,7468,,2047,,,,875521,A,11/16/2020 17:55,2020-11-16T17:55:00Z,11/16 12:55,19579,,2020-11-16T17:55:00Z,9371443,,,1027889,,,,,528417,53738,,,,,,,495966,41850,48,7168,0,9378611,7168,9378611,20,0,544cb72a4931aba80571cfd97cb1722bc280cb25,0,0,0,0,0,
+20201116,UT,155779,,1042778,,totalTestsViral,1615313,519,6859,198,1303,,487,105481,A+,11/16/2020 10:21,2020-11-16T10:21:00Z,11/16 05:21,723,6859,2020-11-16T10:21:00Z,1615313,157309,1458004,145712,,,,1188490,,,,,,,65768,10527,139150,10890,49,1971,7318,1198557,13520,1198557,5,90,e006b8c526ef984197ae2a4ebaf6f54ccc18c70b,0,0,0,0,0,
+20201116,VA,204637,19112,2752608,266,totalTestEncountersViral,2938133,1337,13552,263,,118,,22362,A+,11/15/2020 17:00,2020-11-15T17:00:00Z,11/15 12:00,3806,13552,2020-11-15T17:00:00Z,,221669,,185525,3533,273,2938133,,,,,,,,,,,,51,2677,15325,2957511,17396,2957245,6,48,f0db1756b8265076b047908260b03a12ccb3f99d,0,0,0,0,0,
+20201116,VI,1434,,24635,41,posNeg,26069,,,,,,,1370,D,11/16/2020 06:55,2020-11-16T06:55:00Z,11/16 01:55,23,,2020-11-16T06:55:00Z,26110,,,,23,,,,,,,,,,,,,,78,0,0,26110,0,26069,0,0,8978d6d0f6c0b835efee45b80c552937481a295c,0,0,0,0,0,
+20201116,VT,3095,74,197377,,totalTestsViral,477590,20,,1,,,,2050,B,11/15/2020 23:59,2020-11-15T23:59:00Z,11/15 18:
+
+TawfiqA05: use this instead: file_path = "/Users/tawfiqabulail/Downloads/Information Infrastructure I /covid_data_set.csv"
+
+
+GitHub Copilot: To read the CSV file located at the specified path and display its contents, you can use the `pandas` library in Python. Here is a step-by-step plan and the corresponding code:
+
+### Plan
+1. Import the `pandas` library.
+2. Define the file path.
+3. Read the CSV file using `pandas`.
+4. Display the contents of the CSV file.
+
+### Code
+```python
+import pandas as pd
+
+# Define the file path
+file_path = "/Users/tawfiqabulail/Downloads/Information Infrastructure I /covid_data_set.csv"
+
+# Read the CSV file
+df = pd.read_csv(file_path)
+
+# Display the contents of the CSV file
+print(df)
+```
+
+This code will read the CSV file and print its contents to the console. Make sure you have the `pandas` library installed. If not, you can install it using the following command:
+```sh
+pip install pandas
+```
+
+TawfiqA05: Write a function which determines which states had the highest death increase across the entire dataset.
+
+make sure that it is generalzed to the whole data set provided and that no external libraries are used
+
+GitHub Copilot: ### Plan
+1. Define a function `state_with_highest_death_increase` that takes the file path as an argument.
+2. Open the file and read its contents line by line.
+3. Initialize a dictionary to store the death increase for each state.
+4. Iterate through each line, split the line by commas, and extract the state and death increase values.
+5. Update the dictionary with the death increase values.
+6. Determine the state with the highest death increase.
+7. Return the state and the highest death increase value.
+
+### Code
+```python
+def state_with_highest_death_increase(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    death_increase = {}
+
+    for line in lines:
+        data = line.strip().split(',')
+        state = data[1]
+        try:
+            deaths = int(data[10])
+        except ValueError:
+            deaths = 0
+
+        if state in death_increase:
+            death_increase[state] += deaths
+        else:
+            death_increase[state] = deaths
+
+    max_state = max(death_increase, key=death_increase.get)
+    return max_state, death_increase[max_state]
+
+# Example usage
+file_path = "/Users/tawfiqabulail/Downloads/Information Infrastructure I /covid_data_set.csv"
+state, deaths = state_with_highest_death_increase(file_path)
+print(f"The state with the highest death increase is {state} with {deaths} deaths.")
+```
+
+This function reads the CSV file, processes each line to extract the state and death increase values, and determines which state had the highest death increase.
